@@ -1,0 +1,5 @@
+-r requirements.txt
+mypy==1.19.1
+mypy_extensions==1.1.0
+watchfiles==1.1.1
+aiosqlite==0.22.1
