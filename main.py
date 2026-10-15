@@ -1,4 +1,5 @@
 from typing import Type
+from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
 from fastapi import FastAPI
 from starlette.responses import JSONResponse
@@ -16,9 +17,17 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(role_router)
 
+
+def _with_pool_size(database_url: str, pool_size: int) -> str:
+    parsed = urlparse(database_url)
+    query = dict(parse_qsl(parsed.query))
+    query["maxsize"] = str(pool_size)
+    return urlunparse(parsed._replace(query=urlencode(query)))
+
+
 register_tortoise(
     app,
-    db_url=envSettings.DATABASE_URL,
+    db_url=_with_pool_size(envSettings.DATABASE_URL, envSettings.DATABASE_POOL_SIZE),
     modules={"models": ["src.infrastructure.persistence.tortoise_orm.models"]},
     generate_schemas=False,
     add_exception_handlers=True,

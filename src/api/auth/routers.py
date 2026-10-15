@@ -26,7 +26,7 @@ async def get_user_by_email(email: str) -> User:
 @router.post("/authenticate", response_model=TokenSchema)
 async def authenticate(data: AuthenticateSchema):
     user = await get_user_by_email(data.email)
-    password_hasher = PasswordHasher()
+    password_hasher = PasswordHasher(salt_len=envSettings.ARGON2_SALT_LENGTH)
     try:
         password_hasher.verify(user.password, data.password)
     except (VerificationError, VerifyMismatchError, InvalidHashError):

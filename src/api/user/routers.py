@@ -3,6 +3,7 @@ from argon2 import PasswordHasher
 from typing import Optional, Any, Annotated
 from uuid import UUID
 
+from src.config import envSettings
 from src.infrastructure.persistence.tortoise_orm.models import User
 from .exceptions import UserNotFoundException
 from .validations import validate_email
@@ -28,7 +29,7 @@ async def create_user(user_data: UserCreateSchema, _: UserPrincipal = Depends(Au
     await validate_email(user_data.email)
 
     user_create = user_data.model_dump(exclude={"role_ids"})
-    password_hasher = PasswordHasher()
+    password_hasher = PasswordHasher(salt_len=envSettings.ARGON2_SALT_LENGTH)
     user_create["password"] = password_hasher.hash(user_create["password"])
 
     user = await User.create(**user_create)
